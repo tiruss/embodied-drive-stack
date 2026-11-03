@@ -1,0 +1,20 @@
+# Python cache & virtualenvs
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Rust build artifacts (keep Cargo.toml, Cargo.lock, src/)
+rust_e2e_pipeline/target/
+
+# OS / IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Optional: Large binary model weights / raw videos if pushing to GitHub without Git LFS
+# (Uncomment below if you want to exclude .mp4 and .onnx from remote push)
+# outputs/*.mp4
+# outputs/*.onnx

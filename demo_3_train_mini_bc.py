@@ -255,7 +255,7 @@ def main():
 
     print("=" * 72)
     print(f"학생 모델 테스트 완료! 최고 보상(Max Reward): {max_reward:.1f} / 4.0")
-    print(f"학습 전후 비교 영상 (Windows): C:\\Users\\tirus\\.gemini\\antigravity\\scratch\\mujoco-imitation-demo\\outputs\\before_vs_after_training.mp4")
+    print(f"학습 전후 비교 영상: {comp_video}")
     print("=" * 72)
 
 

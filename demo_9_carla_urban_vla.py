@@ -38,17 +38,25 @@ def get_wsl_host_ip() -> str:
     return "127.0.0.1"
 
 
-def connect_carla_client(port: int = 2000) -> tuple[carla.Client, carla.World, str]:
-    candidates = ["127.0.0.1", get_wsl_host_ip()]
-    for host in candidates:
-        try:
-            client = carla.Client(host, port)
-            client.set_timeout(8.0)
-            world = client.get_world()
-            return client, world, host
-        except Exception:
-            continue
-    raise RuntimeError(f"CARLA 서버(포트 {port})에 연결할 수 없습니다. CarlaUE4.exe가 실행 중인지 확인하세요.")
+def connect_carla_client(port: int = 3000) -> tuple[carla.Client, carla.World, str]:
+    env_host = os.environ.get("CARLA_HOST")
+    env_port = os.environ.get("CARLA_PORT")
+    hosts = [env_host] if env_host else ["127.0.0.1", get_wsl_host_ip()]
+    ports = [int(env_port)] if env_port else [port, 2000, 3000]
+    seen_ports = []
+    for p in ports:
+        if p not in seen_ports:
+            seen_ports.append(p)
+    for p in seen_ports:
+        for host in hosts:
+            try:
+                client = carla.Client(host, p)
+                client.set_timeout(6.0)
+                world = client.get_world()
+                return client, world, host
+            except Exception:
+                continue
+    raise RuntimeError(f"CARLA 서버(포트 {seen_ports})에 연결할 수 없습니다. CarlaUE4 실행 여부를 확인하세요.")
 
 
 class CarlaVLAWaypointNet(nn.Module):

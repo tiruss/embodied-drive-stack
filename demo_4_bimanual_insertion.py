@@ -126,7 +126,7 @@ def main():
 
     print("=" * 72)
     print(f"추론 완료! 최고 보상(Max Reward): {max_reward:.1f} / 4.0")
-    print(f"결과 영상 (Windows): C:\\Users\\tirus\\.gemini\\antigravity\\scratch\\mujoco-imitation-demo\\outputs\\aloha_act_insertion.mp4")
+    print(f"결과 영상: {out_video}")
     print("=" * 72)
 
 

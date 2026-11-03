@@ -12,8 +12,7 @@ import numpy as np
 def main():
     proj_dir = Path(__file__).resolve().parent
     out_dir = proj_dir / "outputs"
-    artifact_dir = Path(r"/mnt/c/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099")
-    artifact_dir.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. AlohaTransferCube 영상에서 4단계 핵심 키프레임 추출
     transfer_mp4 = out_dir / "aloha_act_transfer_cube.mp4"
@@ -103,12 +102,7 @@ def main():
     plt.savefig(plot_path, dpi=160, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close(fig)
 
-    # 아티팩트 디렉토리로 이미지 및 MP4 복사
-    for f in [stage_strip_path, snap_path, plot_path, transfer_mp4, comp_mp4, out_dir / "aloha_act_insertion.mp4"]:
-        if f.exists():
-            shutil.copy2(f, artifact_dir / f.name)
-
-    print("Visual assets generated and copied to artifact directory successfully!")
+    print(f"Visual assets generated in {out_dir} successfully!")
 
 
 if __name__ == "__main__":

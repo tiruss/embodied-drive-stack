@@ -1,0 +1,23 @@
+# Core Deep Learning & Vision
+torch>=2.4.0
+torchvision>=0.19.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+imageio>=2.34.0
+imageio-ffmpeg>=0.4.9
+opencv-python>=4.9.0
+
+# Robotics & Imitation Learning (Phase 1 ~ Phase 3)
+mujoco>=3.1.0
+gymnasium>=0.29.1
+gym-aloha>=0.1.1
+lerobot>=0.4.0
+highway-env>=1.8.2
+
+# Pretrained VLM & ONNX Deployment (Phase 4 & Phase 7)
+transformers>=4.40.0
+sentence-transformers>=3.0.0
+onnx>=1.16.0
+
+# Optional: CARLA 0.9.15 Client (Phase 4 ~ Phase 6)
+# carla==0.9.15

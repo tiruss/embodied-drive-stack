@@ -179,8 +179,7 @@ def main():
     print(f"추론 완료! 최고 보상(Max Reward): {max_reward:.1f} / 4.0")
     if success_step is not None:
         print(f"성공 여부: 성공 (Step {success_step}에서 반대쪽 팔로 전달 완료!)")
-    print(f"결과 영상 저장 위치 (WSL)    : {video_path}")
-    print(f"결과 영상 저장 위치 (Windows): C:\\Users\\tirus\\.gemini\\antigravity\\scratch\\mujoco-imitation-demo\\outputs\\aloha_act_transfer_cube.mp4")
+    print(f"결과 영상 저장 위치: {video_path}")
     print("=" * 70)
 
 

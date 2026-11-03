@@ -1,7 +1,7 @@
 # 🤖 MuJoCo + LeRobot 최신 모방학습(ACT) 시각 스터디 가이드
 
 **실습 환경:** Windows WSL2 (Ubuntu 24.04) · **NVIDIA GeForce RTX 4090 (24GB)** · `MuJoCo 3.17` (`MUJOCO_GL=egl`) · `LeRobot 0.4`  
-**워크스페이스 경로:** [mujoco-imitation-demo](file:///C:/Users/tirus/.gemini/antigravity/scratch/mujoco-imitation-demo)
+**워크스페이스 경로:** [mujoco-imitation-demo](..)
 
 ---
 
@@ -9,7 +9,7 @@
 
 스탠포드 ALOHA 팀의 **ACT (Action Chunking with Transformers)** 정책이 상단 카메라 RGB 이미지(`480×640×3`)와 양팔의 14개 관절 각도(`14-DoF`)를 입력받아 **오른팔로 빨간 큐브를 집어 올린 뒤 공중에서 왼팔에 건네주는 4단계 과정**입니다.
 
-![ALOHA 4단계 핵심 동작 프레임](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/aloha_4stages_strip.png)
+![ALOHA 4단계 핵심 동작 프레임](../outputs/aloha_4stages_strip.png)
 
 > [!TIP]
 > **보상(Reward) 체계:** `0.0` (초기 상태) → `1.0` (오른팔이 큐브에 닿음) → `2.0` (오른팔이 큐브를 들어 올림) → `3.0` (왼팔이 공중에서 큐브를 함께 잡음) → **`4.0` (오른팔이 손을 놓고 왼팔이 완전히 전달받아 들고 있음, 최종 성공!)**
@@ -21,11 +21,11 @@
 슬라이드를 넘기며 **① RTX 4090 직접 학습 전/후 비교 영상**, **② 사전 학습된 ACT 양팔 큐브 전달 영상**, **③ 양팔 공중 핀 삽입(Peg-in-Hole) 영상**을 바로 재생해 볼 수 있습니다.
 
 ````carousel
-![RTX 4090 학습 전(좌) vs 120 에폭 학습 + Temporal Ensembling 후(우)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/before_vs_after_training.mp4)
+![RTX 4090 학습 전(좌) vs 120 에폭 학습 + Temporal Ensembling 후(우)](../outputs/before_vs_after_training.mp4)
 <!-- slide -->
-![Pre-trained ACT 양팔 큐브 전달 (Step 337 성공, Reward 4.0)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/aloha_act_transfer_cube.mp4)
+![Pre-trained ACT 양팔 큐브 전달 (Step 337 성공, Reward 4.0)](../outputs/aloha_act_transfer_cube.mp4)
 <!-- slide -->
-![양팔 공중 핀 삽입 (AlohaInsertion-v0)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/aloha_act_insertion.mp4)
+![양팔 공중 핀 삽입 (AlohaInsertion-v0)](../outputs/aloha_act_insertion.mp4)
 ````
 
 ---
@@ -65,7 +65,7 @@ flowchart LR
 
 ### 3.2 핵심 실험 결과: 단순 오픈루프 vs Action Chunking + Temporal Ensembling
 
-![RTX 4090 학습 곡선 및 Temporal Ensembling 궤적 비교](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/training_and_ensemble_plot.png)
+![RTX 4090 학습 곡선 및 Temporal Ensembling 궤적 비교](../outputs/training_and_ensemble_plot.png)
 
 우리가 직접 [demo_2_act_pretrained.py](../demo_2_act_pretrained.py)와 [demo_3_train_mini_bc.py](../demo_3_train_mini_bc.py)에서 실험하며 확인한 **모방학습의 4가지 결정적 원리**입니다:
 
@@ -80,7 +80,7 @@ flowchart LR
 
 ## 4. 학습 전(Untrained) vs RTX 4090 학습 후(Trained) 스냅샷 비교
 
-![Step 350 시점의 학습 전후 비교](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/before_vs_after_snapshot.png)
+![Step 350 시점의 학습 전후 비교](../outputs/before_vs_after_snapshot.png)
 
 * **좌측 (학습 전):** 무작위 초기화된 [`ActionChunkingNet`](../demo_3_train_mini_bc.py#L29-L69)은 빨간 큐브 근처에도 가지 못하고 허공을 맴돕니다 (`Reward: 0.0 / 4.0`).
 * **우측 (RTX 4090 7.8초 학습 후):** 단 3개의 시연 에피소드(1,200 프레임)만으로 120 에폭 학습한 뒤 Temporal Ensembling을 적용하자, 오른팔로 집어 올린 큐브를 왼팔 그리퍼에 정확히 인계했습니다 (`Reward: 4.0 / 4.0`).
@@ -127,9 +127,9 @@ action = (actions_for_curr_step * exp_weights[:, None]).sum(axis=0)
 자율주행의 **`DiffusionDrive`**·**`GoalFlow`** 및 로봇 **`Diffusion Policy`**·**$\pi_0$**가 사용하는 핵심 수학 엔진입니다.  
 앞에 장애물이 있을 때 왼쪽 회피 궤적과 오른쪽 회피 궤적이 반반 섞여 있는 다중 경로(Multi-modal) 데이터에서, 일반 회귀 모델은 두 궤적의 평균(정면충돌)을 내뱉지만 **Flow-Matching / Diffusion은 가우시안 노이즈 $A^{(0)} \sim \mathcal{N}(0, I)$에서 출발해 속도장 $v_\theta(A^{(\tau)}, \tau \mid \text{img}, s_t)$를 따라 10스텝 ODE 적분($\tau: 0.0 \to 1.0$)으로 단일 궤적을 깎아냅니다.**
 
-![Flow-Matching 10스텝 ODE 디노이징 과정](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/flow_matching_denoising.png)
+![Flow-Matching 10스텝 ODE 디노이징 과정](../outputs/flow_matching_denoising.png)
 
-![Flow-Matching 10-Step ODE 디노이징으로 Step 314에 양팔 큐브 전달 성공 (Reward 4.0)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/aloha_flow_matching.mp4)
+![Flow-Matching 10-Step ODE 디노이징으로 Step 314에 양팔 큐브 전달 성공 (Reward 4.0)](../outputs/aloha_flow_matching.mp4)
 
 * **학습 수식 ([`demo_5_diffusion_flow_policy.py`](../demo_5_diffusion_flow_policy.py#L254-L263)):**
   $$x_\tau = (1 - \tau) x_0 + \tau x_1, \quad \mathcal{L}_{\text{CFM}} = \left\| v_\theta(x_\tau, \tau \mid \text{img}, s_t) - (x_1 - x_0) \right\|_2^2$$
@@ -146,9 +146,9 @@ action = (actions_for_curr_step * exp_weights[:, None]).sum(axis=0)
 2. **Prompt #2:** `"transfer red cube from right arm to left arm"` → 오른팔로 집어 **왼팔로 공중 전달 완수 (`Reward = 4.0`)**
 3. **Prompt #3:** `"open grippers and spread both arms to safe home"` → 큐브를 건드리지 않고 **양팔 그리퍼를 열어 안전 홈 자세로 복귀 (`Reward = 0.0`)**
 
-![VLA 3가지 언어 명령 동시 비교 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/vla_3commands_snapshot.png)
+![VLA 3가지 언어 명령 동시 비교 스냅샷](../outputs/vla_3commands_snapshot.png)
 
-![VLA 3가지 자연어 프롬프트 제어 3분할 비교 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/vla_language_commands.mp4)
+![VLA 3가지 자연어 프롬프트 제어 3분할 비교 영상](../outputs/vla_language_commands.mp4)
 
 ---
 
@@ -162,9 +162,9 @@ action = (actions_for_curr_step * exp_weights[:, None]).sum(axis=0)
 * **Prompt #2 (중단):** `"cruise safely in the rightmost lane"` → 맨 우측 4차선으로 합류해 앞차와 ACC 안전거리 유지 정속 주행
 * **Prompt #3 (하단):** `"merge into leftmost lane and hold speed"` → 맨 좌측 1차선으로 차선 변경 후 주행
 
-![고속도로 자율주행 VLA 3가지 자연어 명령 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/highway_vla_snapshot.png)
+![고속도로 자율주행 VLA 3가지 자연어 명령 스냅샷](../outputs/highway_vla_snapshot.png)
 
-![24초 장거리 고속도로 자율주행 VLA + 테슬라 FSD 스타일 미래 궤적 카펫 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/highway_vla_fsd.mp4)
+![24초 장거리 고속도로 자율주행 VLA + 테슬라 FSD 스타일 미래 궤적 카펫 영상](../outputs/highway_vla_fsd.mp4)
 
 ---
 
@@ -177,9 +177,9 @@ MuJoCo 3.17 물리 엔진으로 **250m 3차선 고속도로(4단계 장애물 �
 * **구간 3 ($x=135\text{m}$, 중앙 대형 화물 트럭):** L2 회귀 모델은 또 평균($0.00\text{m}$)으로 직진해 **2차 대형 충돌!** 반면 Flow-Matching Mode A는 우측($-3.29\text{m}$), Mode B는 좌측($+3.94\text{m}$)으로 **교차 슬라럼 추월**합니다.
 * **구간 4 ($x=185\text{m} \to 215\text{m}$ 피니시 게이트):** 마지막 통제 구간을 통과해 중앙 차선으로 복귀하며 220m 전 구간을 무사고 완주합니다!
 
-![MuJoCo 3D 자율주행차 220m 슬라럼 코스 (블랙박스 PIP + 하단 미니맵 포함) 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/mujoco_3d_car_snapshot.png)
+![MuJoCo 3D 자율주행차 220m 슬라럼 코스 (블랙박스 PIP + 하단 미니맵 포함) 스냅샷](../outputs/mujoco_3d_car_snapshot.png)
 
-![20초 장거리 MuJoCo 3D 자율주행차 220m 4연속 장애물 슬라럼 3분할 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/mujoco_3d_car_flow_vs_l2.mp4)
+![20초 장거리 MuJoCo 3D 자율주행차 220m 4연속 장애물 슬라럼 3분할 영상](../outputs/mujoco_3d_car_flow_vs_l2.mp4)
 
 ---
 
@@ -195,9 +195,9 @@ Windows 네이티브로 구동되는 **CARLA 0.9.15 서버(`D:\CARLA_0.9.15`, �
 > [!IMPORTANT]
 > **Windows Hyper-V / WSL 포트 충돌 주의:** Windows 환경에서는 `1951~2050`번 TCP 포트가 시스템(`WinNAT`)에 의해 예약되어 있는 경우가 많아 CARLA 기본 포트(`2000`)로 실행 시 바인딩 예외(`0xe06d7363`)가 발생할 수 있습니다. 반드시 예약 범위 밖인 **`-carla-rpc-port=3000`** 옵션을 사용하세요 (`D:\CARLA_0.9.15\Run_CARLA_Server_Port3000.bat` 제공).
 
-![CARLA 0.9.15 도심 교차로 좌회전 순간의 4종 멀티센서 대시보드 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_quad_snapshot.png)
+![CARLA 0.9.15 도심 교차로 좌회전 순간의 4종 멀티센서 대시보드 스냅샷](../outputs/carla_quad_snapshot.png)
 
-![CARLA 0.9.15 4종 멀티센서 2x2 도심 자율주행 대시보드 영상 (400 프레임 / 20초)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_quad_dashboard.mp4)
+![CARLA 0.9.15 4종 멀티센서 2x2 도심 자율주행 대시보드 영상 (400 프레임 / 20초)](../outputs/carla_quad_dashboard.mp4)
 
 ---
 
@@ -213,9 +213,9 @@ CARLA 내장 오토파일럿을 완전히 끄고(`set_autopilot(False)`), **RTX 
 2. **Prompt #2 (중앙 패널):** `"change to right lane and pass the obstacle safely"` → 경찰차 **오른쪽 차선(`d = +3.33m`, `31.5 km/h`)으로 핸들을 꺾어 회피 추월 성공!**
 3. **Prompt #3 (우측 패널):** `"brake smoothly and stop behind the police car"` → 차선을 유지(`d = +0.02m`)한 채 브레이크를 밟아 **경찰차 바로 뒤(`s = 16.9m`)에서 `0.0 km/h`로 완전 정지 성공!**
 
-![CARLA End-to-End VLA: 경찰차를 좌측 추월(좌) vs 우측 추월(중) vs 안전 정지(우)하는 3분할 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_vla_3commands_snapshot.png)
+![CARLA End-to-End VLA: 경찰차를 좌측 추월(좌) vs 우측 추월(중) vs 안전 정지(우)하는 3분할 스냅샷](../outputs/carla_vla_3commands_snapshot.png)
 
-![CARLA End-to-End VLA 3가지 자연어 명령 폐루프 주행 비교 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_vla_3commands.mp4)
+![CARLA End-to-End VLA 3가지 자연어 명령 폐루프 주행 비교 영상](../outputs/carla_vla_3commands.mp4)
 
 ---
 
@@ -228,7 +228,7 @@ CARLA 내장 오토파일럿을 완전히 끄고(`set_autopilot(False)`), **RTX 
 > * **현상 (좌측 히트맵):** 순수 CLIP 전역 문장 임베딩(EOS 토큰)은 정적 이미지 캡션으로 학습되어 방향성(`left`, `right`)보다 눈에 보이는 명사(`police`, `car`)에 훨씬 큰 가중치를 둡니다. 그 결과 `"swerve left to go around the police vehicle"`을 입력하면 `left`를 무시하고 `police car`가 들어간 정지 명령(`Seen #3`)과 가장 높은 코사인 유사도(`0.852`)를 출력합니다!
 > * **해법 (중앙·우측 히트맵):** [`PretrainedMultimodalBackbone.encode_prompt_with_late_interaction`](../demo_11_carla_pretrained_vlm_vla.py#L118-L149)에서 ColBERT 스타일 **Subphrase Late-Interaction (`MaxSim`)**을 적용하여 문장 속 1~2단어 슬라이딩 구절(`swerve left`, `steer right`, `halt immediately`)과 주행 개념 앵커 간의 최대 유사도를 추출함으로써, 명사 노이즈를 완벽히 제거하고 **100% 대각선 매칭(`Left 99.4%`, `Right 97.0%`, `Stop 100.0%`)**을 달성했습니다!
 
-![VLM Bag-of-Objects 편향 비교 및 Subphrase Late-Interaction Zero-Shot 시맨틱 매칭 매트릭스](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_vlm_similarity_matrix.png)
+![VLM Bag-of-Objects 편향 비교 및 Subphrase Late-Interaction Zero-Shot 시맨틱 매칭 매트릭스](../outputs/carla_vlm_similarity_matrix.png)
 
 ### 학습 문장(Seen) vs 평가 문장(100% Unseen Zero-Shot) 주행 결과 비교
 
@@ -238,9 +238,9 @@ CARLA 내장 오토파일럿을 완전히 끄고(`set_autopilot(False)`), **RTX 
 | **Mode #2 (우측 우회)** | `"change to right lane and pass the obstacle safely"` | **`"steer right to bypass the roadblock ahead"`** | **Right `97.0%`** | 전진 `s=57.8m`, **우측 차선 `d=+1.74m` (`28.9 km/h`) 우회 성공!** |
 | **Mode #3 (긴급 정지)** | `"brake smoothly and stop behind the police car"` | **`"emergency! halt the car immediately in front of the hazard"`** | **Stop `100.0%`** | 전진 `s=16.9m`, **경찰차 앞 `d=-0.03m` (`0.0 km/h`) 완전 정지!** |
 
-![Pre-trained VLM Zero-Shot CARLA 주행 3분할 스냅샷](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_pretrained_vlm_snapshot.png)
+![Pre-trained VLM Zero-Shot CARLA 주행 3분할 스냅샷](../outputs/carla_pretrained_vlm_snapshot.png)
 
-![Pre-trained VLM Zero-Shot CARLA 주행 비교 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_pretrained_vlm_zeroshot.mp4)
+![Pre-trained VLM Zero-Shot CARLA 주행 비교 영상](../outputs/carla_pretrained_vlm_zeroshot.mp4)
 
 ---
 
@@ -256,11 +256,11 @@ CARLA 내장 오토파일럿을 완전히 끄고(`set_autopilot(False)`), **RTX 
 | **조향 떨림 (Steering Jerk)** | `0.027` (고주파 핸들 진동 발생) | **`0.003` (9배 더 매끄러운 조향 안정성!)** |
 | **평균 / 최대 경로 오차** | 평균 `0.22 m` / 최대 `0.51 m` (두 번째 장애물 통과 후 차선 바깥으로 밀려남) | **평균 `0.12 m` / 최대 `0.41 m` (S자 슬라럼 후 목표 차선 정밀 복귀!)** |
 
-![1세대 블랙박스 E2E(좌: CNN Saliency PIP) vs 2세대 플래닝 E2E(우: 자체 예측 Seg PIP + 3D FSD 카펫) 및 하단 실시간 Top-Down 미니맵](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_e2e_gen1_vs_gen2_snapshot.png)
+![1세대 블랙박스 E2E(좌: CNN Saliency PIP) vs 2세대 플래닝 E2E(우: 자체 예측 Seg PIP + 3D FSD 카펫) 및 하단 실시간 Top-Down 미니맵](../outputs/carla_e2e_gen1_vs_gen2_snapshot.png)
 
-![1세대 vs 2세대 E2E 주행 궤적, 조향 각도 떨림(Jerk), 횡방향 경로 추종 오차 비교 분석 그래프](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_e2e_telemetry_analysis.png)
+![1세대 vs 2세대 E2E 주행 궤적, 조향 각도 떨림(Jerk), 횡방향 경로 추종 오차 비교 분석 그래프](../outputs/carla_e2e_telemetry_analysis.png)
 
-![1세대 Black-Box E2E vs 2세대 Planning E2E 연속 장애물 S자 회피 주행 비교 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_e2e_gen1_vs_gen2.mp4)
+![1세대 Black-Box E2E vs 2세대 Planning E2E 연속 장애물 S자 회피 주행 비교 영상](../outputs/carla_e2e_gen1_vs_gen2.mp4)
 
 ---
 
@@ -291,13 +291,13 @@ flowchart LR
 | **Stage 4 양측 협로 게이트 (`s=126m`) & Stage 6 정차 (`s=193m`)** | Stage 3에서 조기 실패하여 미도달 (`s=83.1m`) | 양측 경찰차 사이 **정중앙 바늘구멍 관통(`d=+0.2m`)** 후 Stage 5 슬라럼 통과, **`s=192.9m` 정지선 앞 `0.0 km/h` 완전 정차!** |
 | **210m 전 구간 평균 경로 오차 / 최소 장애물 간격** | 평균 오차 `4.22 m` / 최소 간격 `2.42 m` | **평균 오차 `0.33 m` / 최소 장애물 안전 간격 `3.03 m` 유지!** |
 
-![Stage 3 갈림길 함정(Bifurcation Trap)에서 2세대 Single-Mode L2(좌: 모드 평균화로 장애물 방향 진입) vs 3세대 SOTA DiffusionDrive+Hydra-MDP(우: 5개 후보 궤적 채점 및 Top-Down BEV Radar 시각화)](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_diffusion_bev_snapshot.png)
+![Stage 3 갈림길 함정(Bifurcation Trap)에서 2세대 Single-Mode L2(좌: 모드 평균화로 장애물 방향 진입) vs 3세대 SOTA DiffusionDrive+Hydra-MDP(우: 5개 후보 궤적 채점 및 Top-Down BEV Radar 시각화)](../outputs/carla_sota_diffusion_bev_snapshot.png)
 
-![210m 6-Stage 도심 복합 장애물 코스 주행 궤적(9대 장애물 표시), Hydra-MDP 5-Mode 실시간 안전 점수 변화, 속도 프로파일 분석 차트](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_gauntlet_telemetry.png)
+![210m 6-Stage 도심 복합 장애물 코스 주행 궤적(9대 장애물 표시), Hydra-MDP 5-Mode 실시간 안전 점수 변화, 속도 프로파일 분석 차트](../outputs/carla_sota_gauntlet_telemetry.png)
 
-![RTX 4090 기반 E2E 세대별 추론 지연시간(Latency), SOTA 서브모듈별 파라미터 비중, ODE 스텝별 속도/주파수 변화, 내부 파이프라인 실행시간 및 VRAM 벤치마크](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_benchmark_analysis.png)
+![RTX 4090 기반 E2E 세대별 추론 지연시간(Latency), SOTA 서브모듈별 파라미터 비중, ODE 스텝별 속도/주파수 변화, 내부 파이프라인 실행시간 및 VRAM 벤치마크](../outputs/carla_sota_benchmark_analysis.png)
 
-![2세대 Single-Mode L2 vs 3세대 SOTA DiffusionDrive + Hydra-MDP + BEV Occupancy 210m 6단계 장거리 비교 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_diffusion_bev_e2e.mp4)
+![2세대 Single-Mode L2 vs 3세대 SOTA DiffusionDrive + Hydra-MDP + BEV Occupancy 210m 6단계 장거리 비교 영상](../outputs/carla_sota_diffusion_bev_e2e.mp4)
 
 ---
 
@@ -313,14 +313,14 @@ flowchart LR
    - **Stage 3 보행자 돌발 횡단 (`s = 88~115 m`):** 우측 인도에서 보행자 2명이 2차선으로 걸어 나오자, 3세대 SOTA는 **속도를 `37 km/h` → `25 km/h`로 부드럽게 감속(Yielding)**함과 동시에 **중앙선 안쪽 1차선(`d = -1.60 m`, `M4*: 96%`)으로 안전 회피**한 뒤, Stage 4 급정거 선행차를 다시 2차선으로 우회하여 `s = 177.6 m` 정지선에서 `0.0 km/h`로 정차했습니다.
 
 ````carousel
-![Stage 2 동적 끼어들기(Dynamic Cut-In): 빨간색 Tesla가 1차선으로 급격히 끼어들 때 노란 중앙선(좌측 황색 이중선)을 넘지 않고 우측 2차선으로 회피하는 3세대 SOTA](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_dynamic_cutin_snapshot.png)
+![Stage 2 동적 끼어들기(Dynamic Cut-In): 빨간색 Tesla가 1차선으로 급격히 끼어들 때 노란 중앙선(좌측 황색 이중선)을 넘지 않고 우측 2차선으로 회피하는 3세대 SOTA](../outputs/carla_sota_dynamic_cutin_snapshot.png)
 <!-- slide -->
-![Stage 3 보행자 돌발 횡단(Jaywalkers Crossing): 우측 2차선으로 걸어 나오는 보행자를 피해 감속하며 노란 중앙선 안쪽 1차선(M4*: 96%)으로 안전 통과하는 3세대 SOTA](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_dynamic_jaywalk_snapshot.png)
+![Stage 3 보행자 돌발 횡단(Jaywalkers Crossing): 우측 2차선으로 걸어 나오는 보행자를 피해 감속하며 노란 중앙선 안쪽 1차선(M4*: 96%)으로 안전 통과하는 3세대 SOTA](../outputs/carla_sota_dynamic_jaywalk_snapshot.png)
 ````
 
-![동일 방향 2차선 주행 궤적 및 노란 중앙선(d=-3.45m) 절대 준수 증명, Hydra-MDP 5-Mode 점수, 보행자 횡단보도 감속(Yielding) 속도 프로파일](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_dynamic_telemetry.png)
+![동일 방향 2차선 주행 궤적 및 노란 중앙선(d=-3.45m) 절대 준수 증명, Hydra-MDP 5-Mode 점수, 보행자 횡단보도 감속(Yielding) 속도 프로파일](../outputs/carla_sota_dynamic_telemetry.png)
 
-![동적 끼어들기(Cut-In) + 보행자 돌발 횡단(Jaywalking) + 중앙선 준수 2세대 vs 3세대 SOTA 비교 주행 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_sota_dynamic_cutin_jaywalk.mp4)
+![동적 끼어들기(Cut-In) + 보행자 돌발 횡단(Jaywalking) + 중앙선 준수 2세대 vs 3세대 SOTA 비교 주행 영상](../outputs/carla_sota_dynamic_cutin_jaywalk.mp4)
 
 ---
 
@@ -344,14 +344,14 @@ flowchart LR
    - **Stage 3 보행자 돌발 횡단 순간 (`s = 89.2 m`):** 우측 2차선으로 보행자가 걸어 나오자, 반대로 **`Universe #2 (우측 2차선, 5%)`**가 기각되고 **노란 중앙선 안쪽 1차선으로 비켜가는 `Universe #0 (97% ★)`**이 선택되어 전 구간(182.0m)을 평균 오차 `0.44 m`, 중앙선 침범 `0회`(`최좌측 d = -1.73 m`)로 완주합니다.
 
 ````carousel
-![Stage 2 동적 끼어들기 순간의 월드 모델 상상(우측 패널): U0(10%)과 U1(8%)의 1.8초 뒤 미래 카메라에는 빨간색 Tesla와 정면충돌 직전 영상이 생성되고, U2(우측 2차선 이동, 96% ★)에는 뚫린 도로가 상상되어 즉시 우측 회피 실행!](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_world_model_dream_cutin.png)
+![Stage 2 동적 끼어들기 순간의 월드 모델 상상(우측 패널): U0(10%)과 U1(8%)의 1.8초 뒤 미래 카메라에는 빨간색 Tesla와 정면충돌 직전 영상이 생성되고, U2(우측 2차선 이동, 96% ★)에는 뚫린 도로가 상상되어 즉시 우측 회피 실행!](../outputs/carla_world_model_dream_cutin.png)
 <!-- slide -->
-![Stage 3 보행자 돌발 횡단 순간의 월드 모델 상상(우측 패널): 우측 2차선에 보행자가 진입하자 U2(5%)를 기각하고 노란 중앙선 안쪽 1차선(U0: 97% ★)의 뚫린 미래를 선택해 안전 통과!](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_world_model_dream_jaywalk.png)
+![Stage 3 보행자 돌발 횡단 순간의 월드 모델 상상(우측 패널): 우측 2차선에 보행자가 진입하자 U2(5%)를 기각하고 노란 중앙선 안쪽 1차선(U0: 97% ★)의 뚫린 미래를 선택해 안전 통과!](../outputs/carla_world_model_dream_jaywalk.png)
 ````
 
-![3가지 평행우주(U0: 1차선, U1: 직진, U2: 2차선)의 1.8초 미래 생존 확률 시계열 변화 및 중앙선 준수 주행 궤적](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_world_model_telemetry.png)
+![3가지 평행우주(U0: 1차선, U1: 직진, U2: 2차선)의 1.8초 미래 생존 확률 시계열 변화 및 중앙선 준수 주행 궤적](../outputs/carla_world_model_telemetry.png)
 
-![Action-Conditioned World Model (3가지 평행우주 실시간 미래 카메라 & BEV 상상) 폐루프 주행 영상](C:/Users/tirus/.gemini/antigravity/brain/a86868a9-6aec-4766-812b-61992147b099/carla_world_model_dreaming.mp4)
+![Action-Conditioned World Model (3가지 평행우주 실시간 미래 카메라 & BEV 상상) 폐루프 주행 영상](../outputs/carla_world_model_dreaming.mp4)
 
 ---
 
@@ -360,7 +360,7 @@ flowchart LR
 ```bash
 # 1. 가상환경 활성화 및 프로젝트 폴더 이동
 source ~/.venvs/mujoco-lerobot/bin/activate
-cd /mnt/c/Users/tirus/.gemini/antigravity/scratch/mujoco-imitation-demo
+cd .
 
 # 2. 3D 대화형 MuJoCo 뷰어 창 띄우기 (마우스로 카메라 회전 및 로봇에 외력 가하기)
 python demo_1_interactive_viewer.py

@@ -378,6 +378,26 @@ flowchart LR
 
 ---
 
+## 17-B. Phase 9: GRPO 강화학습 사후 학습 (`demo_17_carla_grpo_rl_post_training.py`)
+
+- **Stage 1 (IL):** "앞 차선이 막히면 2차선 중앙(d=+1.70m)으로 크게 차선 변경"하는 사람 습관만 지도학습한 참조 정책 `pi_ref`.
+- **Stage 2 (GRPO):** 상태당 G=8개 궤적 샘플링 → 물리 보상(충돌/중앙선/여유거리/승차감) → 그룹 상대 어드밴티지 `A_i = (R_i - mean) / std` → Clipped ratio + `beta * KL(pi || pi_ref)`. Critic 네트워크 없음.
+- **Stage 3 (CARLA 폐루프):** 1차선 고장차(s=39m, d=-1.75m) + 2차선 침범 차량(s=44m, d=+1.30m) 협공 구간. **회피 횡방향 목표는 정책의 argmax 모드 궤적이 직접 결정** (IL/GRPO 동일 코드 경로). 속도·통과 후 1차선 복귀는 규칙 기반.
+
+| 결과 (실행마다 약간 다름) | IL-Only | GRPO |
+| :--- | :---: | :---: |
+| 오프라인 협공 충돌률 (argmax) | ~55–60% | **~15–29%** |
+| CARLA 폐루프 | 침범 차량과 충돌 | 무충돌 통과 (최소 거리 ~1.38m) |
+
+> [!NOTE]
+> 장난감 규모(55 iteration, 합성 상태)라 오프라인 충돌률이 0%까지 내려가지 않으며, 실행마다 수치가 흔들립니다. KL 항이 계속 증가하는 것도 보이는데, 실제 연구에서는 beta 스케줄링/early stopping이 필요합니다.
+
+![GRPO 협공 통과 스냅샷](../outputs/carla_grpo_needle_thread_snapshot.png)
+
+![GRPO 텔레메트리](../outputs/carla_grpo_rl_telemetry.png)
+
+---
+
 ## 18. 빠른 실행 치트시트 (WSL 터미널)
 
 ```bash

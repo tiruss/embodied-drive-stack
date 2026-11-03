@@ -92,6 +92,7 @@ embodied-drive-stack/
 ├── demo_14_carla_sota_dynamic_cutin_jaywalk.py   # [Phase 6] 중앙선 침범 방지(Same-Direction 2차선) + 동적 칼치기/무단횡단/급정거 회피
 ├── demo_15_carla_action_world_model.py           # [Phase 6] Action-Conditioned World Model (3개 평행우주 미래 카메라/BEV 상상)
 ├── demo_16_carla_surround_6cam_bevformer_e2e.py  # [Phase 12] 360° 6-카메라 Surround BEVFormer + 후측방 사각지대 68km/h 추월차량 양보/회피
+├── demo_17_carla_grpo_rl_post_training.py        # [Phase 9] IL 사전학습 → GRPO(G=8, KL 정규화) 강화학습 사후 학습 + CARLA 협공 구간 비교
 ├── export_and_ros2_deploy_template.py            # [Phase 7] SOTA 모델 Static ONNX 변환 및 ROS 2 Humble/Jazzy 실차 CAN 노드 생성
 ├── production_e2e_pipeline_architecture.py       # [Phase 7] 6-Pillar 프로덕션 아키텍처 (PTP 동기화 + Dual-Rate + ASIL-D CBF/RSS + 블랙박스)
 ├── benchmark_python_vs_rust_e2e.py               # [Phase 8] Python vs Native Rust + CUDA Graph 프로덕션 파이프라인 맞대결 벤치마크

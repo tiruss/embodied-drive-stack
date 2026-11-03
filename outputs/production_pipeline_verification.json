@@ -1,0 +1,158 @@
+{
+  "hardware": "NVIDIA GeForce RTX 4090",
+  "total_frames_simulated": 150,
+  "system1_fast_loop_latency_ms": {
+    "mean": 3.297,
+    "p99": 4.557,
+    "target_budget_ms": 10.0
+  },
+  "system2_slow_loop_latency_ms": {
+    "mean": 2.219,
+    "p99": 2.806,
+    "target_budget_ms": 50.0
+  },
+  "safety_verification": {
+    "double_yellow_line_d_m": -3.45,
+    "cbf_safe_boundary_d_m": -2.55,
+    "min_lateral_d_reached_m": -2.653,
+    "yellow_line_violations": 0,
+    "tier2_cbf_interventions": 11,
+    "tier2_rss_aeb_interventions": 42,
+    "tier3_mrm_interventions": 10,
+    "driver_overrides": 12
+  },
+  "fleet_data_engine_triggers": [
+    {
+      "clip_id": "FLEET_CLIP_001_F030",
+      "trigger_frame": 30,
+      "trigger_reason": "RULE_3_TIER2_RSS_CLASSICAL_LIDAR_AEB",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 11.02,
+      "frenet_d_m": 0.769,
+      "lidar_dist_m": 13.5,
+      "mode_entropy": 0.2748
+    },
+    {
+      "clip_id": "FLEET_CLIP_002_F040",
+      "trigger_frame": 40,
+      "trigger_reason": "RULE_3_TIER2_RSS_CLASSICAL_LIDAR_AEB",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 10.73,
+      "frenet_d_m": 0.383,
+      "lidar_dist_m": 13.5,
+      "mode_entropy": 0.2746
+    },
+    {
+      "clip_id": "FLEET_CLIP_003_F050",
+      "trigger_frame": 50,
+      "trigger_reason": "RULE_4_HIGH_EPISTEMIC_UNCERTAINTY",
+      "active_tier": 1,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 10.17,
+      "frenet_d_m": -0.046,
+      "lidar_dist_m": 13.5,
+      "mode_entropy": 0.93
+    },
+    {
+      "clip_id": "FLEET_CLIP_004_F065",
+      "trigger_frame": 65,
+      "trigger_reason": "RULE_3_TIER2_CBF_YELLOW_LINE_CLAMP",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 9.49,
+      "frenet_d_m": -2.62,
+      "lidar_dist_m": 38.0,
+      "mode_entropy": 0.5254
+    },
+    {
+      "clip_id": "FLEET_CLIP_005_F075",
+      "trigger_frame": 75,
+      "trigger_reason": "RULE_3_TIER2_CBF_YELLOW_LINE_CLAMP",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 9.8,
+      "frenet_d_m": -2.572,
+      "lidar_dist_m": 38.0,
+      "mode_entropy": 0.5258
+    },
+    {
+      "clip_id": "FLEET_CLIP_006_F090",
+      "trigger_frame": 90,
+      "trigger_reason": "RULE_3_TIER2_RSS_CLASSICAL_LIDAR_AEB",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 10.34,
+      "frenet_d_m": -1.842,
+      "lidar_dist_m": 9.5,
+      "mode_entropy": 0.2365
+    },
+    {
+      "clip_id": "FLEET_CLIP_007_F100",
+      "trigger_frame": 100,
+      "trigger_reason": "RULE_3_TIER2_RSS_CLASSICAL_LIDAR_AEB",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 10.23,
+      "frenet_d_m": -1.148,
+      "lidar_dist_m": 7.7,
+      "mode_entropy": 0.5275
+    },
+    {
+      "clip_id": "FLEET_CLIP_008_F110",
+      "trigger_frame": 110,
+      "trigger_reason": "RULE_3_TIER2_RSS_CLASSICAL_LIDAR_AEB",
+      "active_tier": 2,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 9.34,
+      "frenet_d_m": -0.518,
+      "lidar_dist_m": 5.9,
+      "mode_entropy": 0.2588
+    },
+    {
+      "clip_id": "FLEET_CLIP_009_F125",
+      "trigger_frame": 125,
+      "trigger_reason": "RULE_2_TIER3_MRM_FAULT",
+      "active_tier": 3,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 7.18,
+      "frenet_d_m": -0.057,
+      "lidar_dist_m": 29.97,
+      "mode_entropy": 0.73
+    },
+    {
+      "clip_id": "FLEET_CLIP_010_F138",
+      "trigger_frame": 138,
+      "trigger_reason": "RULE_1_HUMAN_DISENGAGEMENT",
+      "active_tier": 3,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 5.48,
+      "frenet_d_m": 0.034,
+      "lidar_dist_m": 30.0,
+      "mode_entropy": 0.73
+    },
+    {
+      "clip_id": "FLEET_CLIP_011_F148",
+      "trigger_frame": 148,
+      "trigger_reason": "RULE_1_HUMAN_DISENGAGEMENT",
+      "active_tier": 3,
+      "pre_buffer_seconds": 10.0,
+      "post_buffer_seconds": 5.0,
+      "ego_speed_mps": 4.43,
+      "frenet_d_m": 0.041,
+      "lidar_dist_m": 30.0,
+      "mode_entropy": 0.73
+    }
+  ]
+}

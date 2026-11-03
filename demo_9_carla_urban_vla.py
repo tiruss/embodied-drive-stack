@@ -13,6 +13,7 @@ Demo 9: CARLA 0.9.15 Real-Time 4-Sensor Autonomous Driving VLA Dashboard (RTX 40
 """
 import argparse
 import math
+import os
 import queue
 import subprocess
 import time

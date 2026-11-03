@@ -355,7 +355,30 @@ flowchart LR
 
 ---
 
-## 17. 빠른 실행 치트시트 (WSL 터미널)
+## 17. Phase 12: 360° 6-카메라 Surround-View BEVFormer & 후측방 사각지대 고속 추월차량 양보 (`demo_16_carla_surround_6cam_bevformer_e2e.py`)
+
+전방 카메라 1대(`FrontOnly_1Cam_E2E`)만 사용하는 자율주행 모델은 **전방 차선이 막혀 옆 차선으로 차선 변경을 시도할 때, 후측방 사각지대(`CAM_BACK_RIGHT`, `CAM_BACK`)에서 고속(`68 km/h`)으로 달려오는 추월 차량을 전혀 볼 수 없어 측면 충돌(Sideswipe Crash)**을 일으킵니다.
+
+이를 해결하기 위해 Tesla FSD / nuScenes / BEVFormer 표준의 **6-카메라 $360^\circ$ 서라운드 리그(`CAM_FRONT_LEFT`, `CAM_FRONT`, `CAM_FRONT_RIGHT`, `CAM_BACK_LEFT`, `CAM_BACK`, `CAM_BACK_RIGHT`)**와 **정밀 내부/외부 캘리브레이션 행렬($K_c, [R_c \mid t_c] \in \text{SE}(3)$) 기반 3D-to-2D Spatial Cross-Attention (`Surround6Cam_BEVFormer_E2E`)**을 구현했습니다:
+
+1. **기하학적으로 정확한 3D Pillar $\rightarrow$ 6-Camera 2D 투영 (`precompute_360_bev_projection_tables`):**
+   - 자차 중심 $x \in [-24\text{m (후방)}, +36\text{m (전방)}], y \in [-10\text{m}, +10\text{m}]$ 범위의 $64 \times 64 \times 3$ 3D 복셀 기둥(Pillar)들을 각 카메라의 외부 행렬 $[R_c \mid t_c]$과 내부 행렬 $K_c$로 투영하여, 시야각(Frustum) 안에 들어오는 카메라 특징만 `F.grid_sample`로 정밀 샘플링해 단일 $360^\circ$ BEV 특징 맵으로 통합합니다.
+2. **후측방 사각지대 인지 및 `Hydra-MDP` 동적 모드 전환 (`M1: 양보 감속` $\rightarrow$ `M4: 안전 차선 변경`):**
+   - 1차선 전방($s = 54\text{m}$)에 고장 경찰차가 서 있고, 우측 2차선 후방에서 **시속 `68 km/h` 빨간색 스포츠카**가 맹렬히 추월해 올라옵니다.
+   - **1-카메라 베이스라인:** 후방을 보지 못해 $s = 26.5\text{m}$에서 우측 2차선으로 핸들을 꺾다가 **`68 km/h` 추월 차량과 정면/측면 충돌(`Collided = True`)!**
+   - **6-카메라 $360^\circ$ BEVFormer (Ours):** `CAM_BACK` 및 `CAM_BACK_RIGHT`에서 추월 차량($\Delta x = -5.2\text{m}$)을 즉시 감지하여 **`M1: BLIND-SPOT YIELD (91%)`** 모드를 발동, 1차선 안에서 안전하게 감속(`32 -> 16 km/h`)하며 추월 차량을 먼저 보낸 뒤, 사각지대가 비워진 순간($\Delta x > +6.0\text{m}$) **`M4: SAFE LANE CHANGE RIGHT (91%)`**로 전환해 무충돌 완주!
+
+![후측방 사각지대 추월차량 감지 및 1차선 내 감속 양보 (M1: 91%)](../outputs/carla_surround_6cam_blindspot_yield.png)
+
+![추월차량 통과 직후 우측 2차선으로 안전 차선 변경 (M4: 91%) vs 1-카메라 베이스라인 충돌](../outputs/carla_surround_6cam_safe_lanechange.png)
+
+![Phase 12 주행 궤적, 양보 감속 속도 프로파일, Hydra-MDP 모드 전환 및 캘리브레이션 오차 민감도 분석](../outputs/carla_surround_6cam_telemetry.png)
+
+![6-카메라 360° Surround BEVFormer vs 1-카메라 베이스라인 폐루프 비교 영상](../outputs/carla_surround_6cam_bevformer.mp4)
+
+---
+
+## 18. 빠른 실행 치트시트 (WSL 터미널)
 
 ```bash
 # 1. 가상환경 활성화 및 프로젝트 폴더 이동
@@ -413,4 +436,7 @@ python benchmark_e2e_models.py
 
 # 18. [실차 배포 파이프라인] SOTA E2E 모델 ONNX 변환 (14.85 MB) 및 ROS 2 / DBW CAN 제어 노드 템플릿 생성
 python export_and_ros2_deploy_template.py
+
+# 19. [Phase 12 - 360° 6-카메라 BEVFormer] 후측방 사각지대 68km/h 추월차량 양보 및 안전 차선 변경
+python demo_16_carla_surround_6cam_bevformer_e2e.py
 ```

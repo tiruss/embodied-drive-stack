@@ -92,6 +92,7 @@ run_carla_suite() {
     python demo_13_carla_sota_diffusion_bev_e2e.py
     python demo_14_carla_sota_dynamic_cutin_jaywalk.py
     python demo_15_carla_action_world_model.py
+    python demo_16_carla_surround_6cam_bevformer_e2e.py
 }
 
 case "$MODE" in

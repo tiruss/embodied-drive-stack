@@ -53,6 +53,14 @@ bash run_all.sh
 | :---: | :---: |
 | ![Dynamic Cut-In](outputs/carla_sota_dynamic_cutin_snapshot.png) | ![World Model Dreaming](outputs/carla_world_model_dream_cutin.png) |
 
+### 4. Phase 12: $360^\circ$ 6-카메라 Surround-View BEVFormer & 후측방 사각지대 추월차량 양보 (`demo_16`)
+* **6대 서라운드 카메라(`CAM_FRONT_LEFT`, `CAM_FRONT`, `CAM_FRONT_RIGHT`, `CAM_BACK_LEFT`, `CAM_BACK`, `CAM_BACK_RIGHT`)**의 정밀 $\text{SE}(3)$ 외부 파라미터($[R_c|t_c]$) 및 내부 파라미터($K_c$)를 이용한 3D-to-2D Spatial Cross-Attention 구현
+* 전방 1차선 고장차 회피 시 후측방 2차선에서 **`68 km/h`로 돌진하는 사각지대 추월차량**을 `CAM_BACK_RIGHT`로 감지하여 **`M1: 차선 내 감속 양보` $\rightarrow$ 통과 후 `M4: 안전 차선 변경`** 수행 (1-카메라 베이스라인은 사각지대 미감지로 측면 충돌)
+
+| 후측방 68 km/h 추월차량 감지 & 차선 내 감속 양보 (`M1: 91%`) | 추월차량 통과 직후 안전 차선 변경 (`M4: 91%`) |
+| :---: | :---: |
+| ![Blindspot Yield](outputs/carla_surround_6cam_blindspot_yield.png) | ![Safe Lane Change](outputs/carla_surround_6cam_safe_lanechange.png) |
+
 ---
 
 ## 📁 레포지토리 디렉토리 구조
@@ -83,6 +91,7 @@ embodied-drive-stack/
 ├── benchmark_e2e_models.py                       # [Phase 5] 1세대 vs 2세대 vs 3세대 SOTA 하드웨어 정밀 벤치마크
 ├── demo_14_carla_sota_dynamic_cutin_jaywalk.py   # [Phase 6] 중앙선 침범 방지(Same-Direction 2차선) + 동적 칼치기/무단횡단/급정거 회피
 ├── demo_15_carla_action_world_model.py           # [Phase 6] Action-Conditioned World Model (3개 평행우주 미래 카메라/BEV 상상)
+├── demo_16_carla_surround_6cam_bevformer_e2e.py  # [Phase 12] 360° 6-카메라 Surround BEVFormer + 후측방 사각지대 68km/h 추월차량 양보/회피
 ├── export_and_ros2_deploy_template.py            # [Phase 7] SOTA 모델 Static ONNX 변환 및 ROS 2 Humble/Jazzy 실차 CAN 노드 생성
 ├── production_e2e_pipeline_architecture.py       # [Phase 7] 6-Pillar 프로덕션 아키텍처 (PTP 동기화 + Dual-Rate + ASIL-D CBF/RSS + 블랙박스)
 ├── benchmark_python_vs_rust_e2e.py               # [Phase 8] Python vs Native Rust + CUDA Graph 프로덕션 파이프라인 맞대결 벤치마크

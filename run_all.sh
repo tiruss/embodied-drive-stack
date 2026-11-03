@@ -94,6 +94,7 @@ run_carla_suite() {
     python demo_15_carla_action_world_model.py
     python demo_16_carla_surround_6cam_bevformer_e2e.py
     python demo_17_carla_grpo_rl_post_training.py
+    python demo_18_carla_3d_detection_e2e.py
 }
 
 case "$MODE" in

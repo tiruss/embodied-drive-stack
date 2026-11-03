@@ -398,6 +398,26 @@ flowchart LR
 
 ---
 
+## 17-C. Phase 13: 3D Object Detection 일체형 E2E 자율주행 (`demo_18_carla_3d_detection_e2e.py`)
+
+- **구조 (SparseDrive / UniAD Style):**
+  - **Learnable 3D Object Queries ($N=16$):** 카메라 특징 맵에 Cross-Attention을 걸어 바운딩 박스 $[x, y, z, w, l, h, \text{yaw}, v_x, v_y]$ 및 객체 분류 예측.
+  - **Hungarian Matching:** 예측 쿼리와 GT 객체 간의 Bipartite Matching을 수행하여 클래스 분류 + L1 박스 회귀 손실로 역전파.
+  - **Object-to-Planner Attention:** 계획 쿼리(Trajectory Queries)가 3D 검출 토큰(Detection Tokens)에 직접 Cross-Attention을 수행하여 객체 공간/속도 토큰을 반영한 경로 생성.
+  - **Model-Driven RSS Shield:** 시뮬레이터 정답(Cheat) 상태가 아닌 **모델이 실제로 검출한 3D Bounding Box와 거리**를 입력받아 안전 거리 미달 시 능동 제동 및 CBF 가상 방호벽 작동.
+
+| 핵심 지표 | 결과 |
+| :--- | :---: |
+| 3D Object Detection mAP (IoU > 0.5) | **93.2%** |
+| CARLA 장애물 (고장차, 횡단보행자, 선행차) 최소 여유 거리 | **1.77 m** (무충돌 안전 회피) |
+| 황색 실선 중앙선 (-3.45m) 위반 횟수 | **0 회** |
+
+![3D Detection 투영 및 폐루프 대시보드](../outputs/carla_3d_detection_snapshot.png)
+
+![Phase 13 멀티태스크 학습 손실 및 3D 거리 텔레메트리](../outputs/carla_3d_detection_telemetry.png)
+
+---
+
 ## 18. 빠른 실행 치트시트 (WSL 터미널)
 
 ```bash

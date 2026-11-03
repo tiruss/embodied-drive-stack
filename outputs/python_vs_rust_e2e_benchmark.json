@@ -1,0 +1,128 @@
+{
+  "rust_native_us": {
+    "pillar1_ptp_lidar_deskew": {
+      "mean_us": 53.913,
+      "p50_us": 55.25,
+      "p90_us": 59.513,
+      "p99_us": 87.507,
+      "p999_us": 764.642,
+      "max_us": 977.353,
+      "std_us": 37.171
+    },
+    "pillar2_4_lockfree_sync_and_ringbuf": {
+      "mean_us": 35.73,
+      "p50_us": 27.802,
+      "p90_us": 40.026,
+      "p99_us": 88.531,
+      "p999_us": 562.724,
+      "max_us": 1549.557,
+      "std_us": 54.178
+    },
+    "pillar3_safety_shield_can_crc": {
+      "mean_us": 0.043,
+      "p50_us": 0.039,
+      "p90_us": 0.045,
+      "p99_us": 0.051,
+      "p999_us": 0.052,
+      "max_us": 4.324,
+      "std_us": 0.096
+    },
+    "full_host_pipeline_under_contention": {
+      "mean_us": 80.499,
+      "p50_us": 76.453,
+      "p90_us": 88.271,
+      "p99_us": 126.756,
+      "p999_us": 205.799,
+      "max_us": 1236.657,
+      "std_us": 28.185
+    }
+  },
+  "python_us": {
+    "pillar1_ptp_lidar_deskew": {
+      "mean_us": 161.082279,
+      "p50_us": 156.187,
+      "p90_us": 178.618,
+      "p99_us": 265.8647299999999,
+      "p999_us": 332.62221800000066,
+      "max_us": 381.065,
+      "std_us": 24.133111919977477
+    },
+    "pillar2_4_lockfree_sync_and_ringbuf": {
+      "mean_us": 81.019468,
+      "p50_us": 77.5725,
+      "p90_us": 92.07410000000002,
+      "p99_us": 140.21793,
+      "p999_us": 432.65494600001546,
+      "max_us": 671.492,
+      "std_us": 22.295651855933166
+    },
+    "pillar3_safety_shield_can_crc": {
+      "mean_us": 6.0553495,
+      "p50_us": 5.865,
+      "p90_us": 6.3311,
+      "p99_us": 10.30103,
+      "p999_us": 35.9139620000002,
+      "max_us": 42.777,
+      "std_us": 1.6455388039635377
+    },
+    "full_host_pipeline_under_contention": {
+      "mean_us": 529.0839504999999,
+      "p50_us": 413.834,
+      "p90_us": 498.1030000000003,
+      "p99_us": 1054.20654,
+      "p999_us": 36091.115413000014,
+      "max_us": 36899.182,
+      "std_us": 1747.4862441771693
+    }
+  },
+  "rtx4090_gpu_us": {
+    "gpu_pytorch_fp32": {
+      "mean_us": 2898.4206480000003,
+      "p50_us": 2828.8900000000003,
+      "p90_us": 3169.3111000000004,
+      "p99_us": 3803.62563,
+      "p999_us": 5100.971911000048,
+      "max_us": 5816.743,
+      "std_us": 259.55822467497364
+    },
+    "gpu_native_fp16": {
+      "mean_us": 478.04112,
+      "p50_us": 450.1965,
+      "p90_us": 502.6182,
+      "p99_us": 1117.40394,
+      "p999_us": 1226.4663660000006,
+      "max_us": 1233.635,
+      "std_us": 139.87059737254862
+    }
+  },
+  "rust_vs_python_speedup": {
+    "pillar1_ptp_lidar_deskew": {
+      "mean_speedup_x": 2.99,
+      "p99_speedup_x": 3.04,
+      "p999_speedup_x": 0.44,
+      "max_spike_speedup_x": 0.39,
+      "jitter_std_reduction_x": 0.65
+    },
+    "pillar2_4_lockfree_sync_and_ringbuf": {
+      "mean_speedup_x": 2.27,
+      "p99_speedup_x": 1.58,
+      "p999_speedup_x": 0.77,
+      "max_spike_speedup_x": 0.43,
+      "jitter_std_reduction_x": 0.41
+    },
+    "pillar3_safety_shield_can_crc": {
+      "mean_speedup_x": 140.82,
+      "p99_speedup_x": 201.98,
+      "p999_speedup_x": 690.65,
+      "max_spike_speedup_x": 9.89,
+      "jitter_std_reduction_x": 17.14
+    },
+    "full_host_pipeline_under_contention": {
+      "mean_speedup_x": 6.57,
+      "p99_speedup_x": 8.32,
+      "p999_speedup_x": 175.37,
+      "max_spike_speedup_x": 29.84,
+      "jitter_std_reduction_x": 62.0
+    }
+  }
+}

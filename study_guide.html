@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MuJoCo + LeRobot 최신 모방학습(ACT) 시각 스터디 가이드</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --green: #34d399;
+      --amber: #fbbf24;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 36px 20px 80px;
+    }
+    .container { max-width: 1120px; margin: 0 auto; }
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.85rem; }
+    h2 { margin-top: 0; font-size: 1.35rem; color: var(--accent); }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .badge {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px 28px;
+      margin-bottom: 24px;
+    }
+    img, video {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.94rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+    }
+    th { background: #1e293b; color: var(--accent); }
+    pre {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🤖 MuJoCo + LeRobot 최신 모방학습(ACT) 시각 스터디 가이드</h1>
+      <p style="color: var(--muted); margin: 0;">WSL2 Ubuntu 24.04 · NVIDIA GeForce RTX 4090 · MuJoCo 3.17 · Action Chunking with Transformers</p>
+      <div class="badges">
+        <span class="badge">RTX 4090 (120 Epochs in 7.8s)</span>
+        <span class="badge">AlohaTransferCube-v0 (Reward 4.0 / 4.0 성공)</span>
+        <span class="badge">Action Chunking (K=50)</span>
+        <span class="badge">Temporal Ensembling</span>
+      </div>
+    </header>
+
+    <div class="section">
+      <h2>1. 양팔 로봇 큐브 공중 전달 4단계 과정 (AlohaTransferCube-v0)</h2>
+      <p>상단 RGB 카메라(480×640×3)와 양팔 14축 관절 각도를 입력받아 오른팔로 빨간 큐브를 집어 왼팔로 공중 인계하는 핵심 단계입니다.</p>
+      <img src="outputs/aloha_4stages_strip.png" alt="ALOHA 4 Stages" />
+    </div>
+
+    <div class="section">
+      <h2>2. RTX 4090 직접 학습 전(Untrained) vs 학습 후(Trained) 비교 영상</h2>
+      <p>좌측은 학습 전 초기 신경망(Reward 0.0), 우측은 시연 3 에피소드로 7.8초간 직접 학습 후 Temporal Ensembling을 적용한 학생 모델(Step 341 전달 완수, Reward 4.0)입니다.</p>
+      <video src="outputs/before_vs_after_training.mp4" controls autoplay loop muted></video>
+      <div class="grid-2" style="margin-top: 18px;">
+        <div>
+          <h3 style="margin: 0 0 6px; font-size: 1.05rem;">Pre-trained ACT 양팔 큐브 전달 (Reward 4.0)</h3>
+          <video src="outputs/aloha_act_transfer_cube.mp4" controls loop muted></video>
+        </div>
+        <div>
+          <h3 style="margin: 0 0 6px; font-size: 1.05rem;">양팔 공중 핀 삽입 (AlohaInsertion-v0)</h3>
+          <video src="outputs/aloha_act_insertion.mp4" controls loop muted></video>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3. 학습 곡선 & 왜 Action Chunking + Temporal Ensembling이 필수인가?</h2>
+      <img src="outputs/training_and_ensemble_plot.png" alt="Training Loss and Temporal Ensembling" />
+      <table>
+        <thead>
+          <tr>
+            <th>핵심 기법</th>
+            <th>적용 전 문제점</th>
+            <th>적용 후 효과 (실험 결과)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Action Chunking (K=50)</strong></td>
+            <td>1스텝씩 예측하면 0.02초마다 미세 오차가 누적(Compounding Error)되어 로봇이 떰</td>
+            <td>미래 50스텝(1초 분량)의 14축 관절 궤적 행렬(50×14)을 한 번에 예측해 일관된 동작 생성</td>
+          </tr>
+          <tr>
+            <td><strong>폐루프 재계획 (replan_steps=20)</strong></td>
+            <td>100스텝(2초) 내내 오픈루프로 실행하면 공중 전달 도킹에서 미세하게 빗나감 (Reward 2.0)</td>
+            <td>20스텝(0.4초)마다 카메라를 다시 보고 궤적을 수정하여 공중 전달 완수 (Reward 4.0)</td>
+          </tr>
+          <tr>
+            <td><strong>Temporal Ensembling</strong></td>
+            <td>청크 경계에서 관절 명령이 튀거나 Covariate Shift로 큐브를 놓침</td>
+            <td>과거 시점들에서 현재 스텝 t에 대해 예측한 값들을 지수 가중 평균(exp(-0.01*i))하여 매끄럽게 성공</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>4. [2세대 SOTA] Flow-Matching / Diffusion 생성형 궤적 플래너 (demo_5)</h2>
+      <p>자율주행의 <code>DiffusionDrive</code> 및 로봇 <code>Pi-0</code>·<code>Diffusion Policy</code>가 다중 경로(Multi-modal) 충돌 문제를 해결하는 핵심 원리입니다. 순수 가우시안 노이즈(τ=0.0)에서 출발해 속도장(Velocity Field)을 따라 10스텝 ODE 적분(τ: 0.0 → 0.2 → 0.5 → 1.0)을 거치며 정교한 미래 50스텝 궤적 청크를 깎아냅니다.</p>
+      <img src="outputs/flow_matching_denoising.png" alt="Flow-Matching Denoising Process" />
+      <video src="outputs/aloha_flow_matching.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>5. [3세대 SOTA] VLA (Vision-Language-Action) 멀티모달 트랜스포머 (demo_6)</h2>
+      <p>단 하나의 신경망(<code>MiniVLAPolicy</code>)에 <strong>카메라 영상(Vision) + 자연어 프롬프트(Language) + 현재 관절 상태(State)</strong>를 입력하여, 자연어 지시어에 따라 ① 오른팔 단독 파지 및 홀드(Reward 2.0), ② 양팔 공중 전달(Reward 4.0), ③ 양팔 안전 홈 복귀(Reward 0.0)의 3가지 행동을 각기 수행하는 3분할 비교 영상입니다.</p>
+      <img src="outputs/vla_3commands_snapshot.png" alt="VLA 3 Commands Snapshot" />
+      <video src="outputs/vla_language_commands.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>6. 🚗 [자율주행 실습 #1] 24초 장거리 고속도로 자율주행 VLA + 테슬라 FSD 궤적 카펫 (demo_7)</h2>
+      <p>고속도로 시뮬레이터(<code>highway-env</code>)에서 단일 자율주행 VLA 모델(<code>AutonomousDrivingVLA</code>)이 주변 7대 차량 상태와 <strong>자연어 운전 명령</strong>을 입력받아 24초(360 스텝, 약 1km 구간) 동안 연속 차선 변경 및 안전 주행을 수행하며 <strong>미래 15스텝 주행 웨이포인트 카펫(Trajectory Carpet)</strong>을 도로 위에 실시간 렌더링합니다.</p>
+      <img src="outputs/highway_vla_snapshot.png" alt="Highway Autonomous Driving VLA Snapshot" />
+      <video src="outputs/highway_vla_fsd.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>7. 🚙 [자율주행 실습 #2] 20초 장거리 MuJoCo 3D 자율주행 (220m 4연속 장애물 슬라럼 코스 + 실시간 미니맵) (demo_8)</h2>
+      <p>220m 3차선 고속도로(600 프레임 / 20초)에 4단계 연속 장애물 구간(중앙 승용차 → 양측 차선 통제 게이트 → 중앙 대형 화물트럭 → 피니시 게이트)을 배치한 3D 시뮬레이션입니다. 일반 모방학습(L2 Regression)은 중앙 장애물마다 평균값(0m) 직진으로 2번 연속 정면충돌하는 반면, <strong>Flow-Matching 생성형 플래너(Mode A & B)</strong>는 좌·중앙·우 교차 슬라럼으로 220m 전 구간을 무사고 완주합니다.</p>
+      <img src="outputs/mujoco_3d_car_snapshot.png" alt="MuJoCo 3D Autonomous Car Snapshot" />
+      <video src="outputs/mujoco_3d_car_flow_vs_l2.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>8. 🏙️ [자율주행 실습 #3] CARLA 0.9.15 언리얼 엔진 4종 멀티센서 도심 자율주행 대시보드 (demo_9)</h2>
+      <p>Windows 네이티브 CARLA 0.9.15 서버(<code>D:\CARLA_0.9.15</code>, 포트 3000)와 WSL2 파이썬 클라이언트를 연동하여, 도심(<code>Town10HD_Opt</code>)을 주행하는 <strong>Tesla Model 3</strong>에 4종 센서(전방 RGB + 3D FSD 카펫, 3인칭 뷰, CityScapes 세그멘테이션, 64채널 3D LiDAR BEV)를 장착하고 63.6 FPS로 기록한 2×2 대시보드입니다.</p>
+      <img src="outputs/carla_quad_snapshot.png" alt="CARLA 4-Sensor Quad Dashboard Snapshot" />
+      <video src="outputs/carla_quad_dashboard.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>9. 🚔 [자율주행 실습 #4] CARLA 0.9.15 End-to-End VLA 폐루프(Closed-Loop) 실차 제어 (demo_10)</h2>
+      <p>CARLA 내장 오토파일럿을 완전히 끄고(<code>set_autopilot(False)</code>), RTX 4090에서 직접 학습한 단일 멀티모달 VLA 신경망(<code>CarlaEndToEndVLA</code>)이 <strong>6채널 비전(실사 RGB + 세그멘테이션) + 자연어 운전 명령 프롬프트</strong>를 받아 테슬라 Model 3의 핸들(<code>steer</code>), 엑셀(<code>throttle</code>), 브레이크(<code>brake</code>)를 직접 제어한 3분할 비교 영상입니다:</p>
+      <ul>
+        <li><strong>Prompt #1 (좌측):</strong> <code>"change to left lane and overtake the stopped car"</code> → 경찰차 왼쪽 차선(<code>d = -3.25m</code>, <code>31.4 km/h</code>)으로 추월!</li>
+        <li><strong>Prompt #2 (중앙):</strong> <code>"change to right lane and pass the obstacle safely"</code> → 경찰차 오른쪽 차선(<code>d = +3.33m</code>, <code>31.5 km/h</code>)으로 추월!</li>
+        <li><strong>Prompt #3 (우측):</strong> <code>"brake smoothly and stop behind the police car"</code> → 차선 유지 후 경찰차 바로 뒤에서 완전 정지(<code>0.0 km/h</code>)!</li>
+      </ul>
+      <img src="outputs/carla_vla_3commands_snapshot.png" alt="CARLA End-to-End VLA 3 Commands Snapshot" />
+      <video src="outputs/carla_vla_3commands.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>10. 🧠 [자율주행 실습 #5] Hugging Face 사전학습 VLM 백본 + Zero-Shot 미지의 언어 명령 제어 (demo_11)</h2>
+      <p>기존 20단어 미니 단어장을 넘어, Hugging Face 사전학습 <strong><code>openai/clip-vit-base-patch32</code> (ViT-B/32 비전 인코더) + <code>sentence-transformers/all-MiniLM-L6-v2</code> (ColBERT 스타일 Subphrase Late-Interaction MaxSim)</strong>를 이식하여, CLIP 전역 문장 풀링의 명사 편향(Bag-of-Objects Bias) 함정을 극복하고 <strong>학습 때 한 번도 본 적 없는 새로운 영어 문장(100% Unseen Zero-Shot Prompts)</strong>으로 차량을 직접 제어한 결과입니다:</p>
+      <ul>
+        <li><strong>Unseen #1 (좌측):</strong> <code>"swerve left to go around the police vehicle"</code> → 매칭 <strong>Left 99.4%</strong>, 좌측 차선(<code>d = -3.05m</code>, <code>30.4 km/h</code>) 추월 성공!</li>
+        <li><strong>Unseen #2 (중앙):</strong> <code>"steer right to bypass the roadblock ahead"</code> → 매칭 <strong>Right 97.0%</strong>, 우측 차선(<code>d = +1.74m</code>, <code>28.9 km/h</code>) 우회 성공!</li>
+        <li><strong>Unseen #3 (우측):</strong> <code>"emergency! halt the car immediately in front of the hazard"</code> → 매칭 <strong>Stop 100.0%</strong>, 장애물 앞 완전 정지(<code>0.0 km/h</code>)!</li>
+      </ul>
+      <img src="outputs/carla_vlm_similarity_matrix.png" alt="Pre-trained VLM Similarity Matrix" />
+      <img src="outputs/carla_pretrained_vlm_snapshot.png" alt="Pre-trained VLM Zero-Shot Snapshot" style="margin-top: 16px;" />
+      <video src="outputs/carla_pretrained_vlm_zeroshot.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>11. 🏎️ [자율주행 실습 #6] E2E 아키텍처 대결: 1세대 순수 블랙박스(PilotNet) vs. 2세대 플래닝 중심 모듈형 E2E(UniAD / FSD v12) (demo_12)</h2>
+      <p>추론 시 두 모델 모두 <strong>오직 전방 Raw RGB 카메라 영상(3ch)</strong>만 입력받는 동일한 조건에서, 도심 2단 연속 경찰차 장애물(S-Chicane) 코스를 주행하며 비교한 결과입니다:</p>
+      <ul>
+        <li><strong>1세대 Black-Box E2E (좌측):</strong> 중간 시맨틱 인지 및 미래 궤적 계획 없이 1스텝 핸들 각도만 출력하여, 배경 노이즈에 시선이 분산(PIP Saliency)되고 핸들 진동(<code>Jerk = 0.027</code>) 및 2차 장애물 통과 후 차선 이탈(최대 오차 <code>0.51m</code>)이 발생합니다.</li>
+        <li><strong>2세대 Planning E2E (우측, UniAD/FSD v12 스타일):</strong> 신경망 내부에서 스스로 도로·차선·경찰차 세그멘테이션을 예측·복원(PIP <code>Self-Predicted Seg</code>)하고 미래 15스텝 3D 웨이포인트를 먼저 계획한 뒤 제어 청크를 출력하여, <strong>9배 더 매끄러운 조향(<code>Jerk = 0.003</code>)</strong>과 <strong>절반 수준의 경로 오차(평균 <code>0.12m</code>)</strong>로 S자 코스를 완벽히 주파합니다!</li>
+      </ul>
+      <img src="outputs/carla_e2e_telemetry_analysis.png" alt="1st-Gen vs 2nd-Gen E2E Telemetry Analysis" />
+      <img src="outputs/carla_e2e_gen1_vs_gen2_snapshot.png" alt="1st-Gen vs 2nd-Gen E2E Snapshot" style="margin-top: 16px;" />
+      <video src="outputs/carla_e2e_gen1_vs_gen2.mp4" controls loop muted style="margin-top: 16px;"></video>
+    </div>
+
+    <div class="section">
+      <h2>12. WSL 터미널 실행 명령어 모음</h2>
+      <pre>source ~/.venvs/mujoco-lerobot/bin/activate
+cd /mnt/c/Users/tirus/.gemini/antigravity/scratch/mujoco-imitation-demo
+
+# 1) 3D 대화형 MuJoCo 뷰어 창 띄우기
+python demo_1_interactive_viewer.py
+
+# 2) 사전 학습된 ACT 모델 추론 (--live 로 실시간 창 보기)
+MUJOCO_GL=egl python demo_2_act_pretrained.py --replan-steps 20 --live
+
+# 3) RTX 4090으로 직접 Action Chunking + Temporal Ensembling 학습 및 비교 영상 생성
+MUJOCO_GL=egl python demo_3_train_mini_bc.py
+
+# 4) 양팔 공중 핀 삽입 데모
+MUJOCO_GL=egl python demo_4_bimanual_insertion.py
+
+# 5) [2세대 SOTA] Flow-Matching (Diffusion ODE) 10스텝 궤적 디노이징 학습 및 실행
+MUJOCO_GL=egl python demo_5_diffusion_flow_policy.py
+
+# 6) [3세대 SOTA] VLA (Vision-Language-Action) 3가지 언어 명령 제어 학습 및 실행
+MUJOCO_GL=egl python demo_6_vla_language_conditioned.py
+
+# 7) [자율주행 #1] 24초 장거리 고속도로 자율주행 VLA + 테슬라 FSD 스타일 미래 궤적 시각화
+SDL_VIDEODRIVER=dummy python demo_7_highway_vla_fsd.py
+
+# 8) [자율주행 #2] 20초 장거리 MuJoCo 3D 자율주행 (220m 4연속 장애물 슬라럼 코스 + 미니맵)
+MUJOCO_GL=egl python demo_8_mujoco_3d_car_flow.py
+
+# 9) [자율주행 #3] CARLA 0.9.15 언리얼 엔진 4종 센서 도심 자율주행 대시보드
+#    (먼저 윈도우에서 D:\CARLA_0.9.15\Run_CARLA_Server_Port3000.bat 더블클릭 후 실행)
+python demo_9_carla_urban_vla.py --port 3000 --steps 400
+
+# 10) [자율주행 #4] CARLA 0.9.15 End-to-End VLA 학습 및 3가지 언어 명령 폐루프 실차 제어
+python demo_10_carla_end_to_end_vla.py --port 3000 --steps 160
+
+# 11) [자율주행 #5] Hugging Face 사전학습 VLM 백본 이식 + Zero-Shot 미지의 영어 명령 주행
+python demo_11_carla_pretrained_vlm_vla.py --port 3000 --steps 160
+
+# 12) [자율주행 #6] 1세대 Black-Box E2E (PilotNet) vs 2세대 Planning E2E (UniAD/FSD v12) 비교
+python demo_12_carla_e2e_gen1_vs_gen2.py --port 3000 --steps 190
+
+# 13) [자율주행 #7 - 2025/2026 SOTA] DiffusionDrive (5-Mode Flow-Matching) + Hydra-MDP + BEV (210m 6-Stage 코스)
+python demo_13_carla_sota_diffusion_bev_e2e.py --port 3000
+
+# 14) [자율주행 #8 - 동적 위험 & 중앙선 준수] 끼어들기(Cut-In) + 보행자 돌발 횡단(Jaywalk) + 급정거 회피
+python demo_14_carla_sota_dynamic_cutin_jaywalk.py --port 3000
+
+# 15) [자율주행 #9 - 생성형 월드 모델] 1.8초 뒤 3가지 평행우주(미래 카메라 + 미래 BEV) 상상 후 최적 주행
+python demo_15_carla_action_world_model.py --port 3000
+
+# 16) [RTX 4090 하드웨어 벤치마크] 전 세대 E2E 추론 속도(ms/Hz), 파라미터 비중, VRAM 정밀 측정
+python benchmark_e2e_models.py</pre>
+    </div>
+
+    <div class="card">
+      <h2>14. 2025–2026 SOTA E2E 자율주행: DiffusionDrive + Hydra-MDP + Top-Down BEV (210m 6단계 초장거리 코스)</h2>
+      <p>
+        <code>demo_13_carla_sota_diffusion_bev_e2e.py</code>는 2세대 모듈형 E2E(단일 궤적 L2 회귀)의 치명적 한계인 <strong>모드 평균화(Mode Averaging)</strong>를 극복한 최신 3세대 SOTA 아키텍처를 구현하고, 총 <strong>215m 길이·9대 장애물 차량·6단계 전술 주행</strong>으로 구성된 초장거리 도심 복합 코스에서 검증합니다:
+      </p>
+      <ul>
+        <li><strong>Top-Down BEV Occupancy Radar (<code>L_bev</code>):</strong> 추론 시 LiDAR 없이 오직 전방 RGB 카메라만 보고 64×64 조감도(도로/차선/장애물 Footprint)를 스스로 예측하여 우측 상단 HUD 레이더에 실시간 시각화합니다.</li>
+        <li><strong>DiffusionDrive Multi-Modal Flow-Matching (<code>M=5</code>, <code>L_flow</code>):</strong> 5개의 공간 앵커(급좌/완좌/직진/완우/급우)에서 출발해 4-Step Euler ODE로 5개 후보 궤적을 동시에 생성합니다.</li>
+        <li><strong>Hydra-MDP Neural Trajectory Scorer (<code>L_score</code>):</strong> 5개 후보 궤적의 무충돌·도로준수·진행도 점수(0~100%)를 실시간 채점하여 위험 궤적은 붉은 점선으로 기각하고, 최고점 궤적(<code>m*</code>)을 에메랄드 FSD 카펫으로 투영합니다.</li>
+        <li><strong>210m 6-Stage 주행 결과:</strong> 2세대 단일 모드 L2는 Stage 3 갈림길 함정(<code>s=83.1m</code>)에서 모드 평균화로 정지한 반면, 3세대 SOTA는 6단계를 모두 통과(평균 오차 <code>0.33m</code>, 최소 장애물 간격 <code>3.03m</code>)하고 <code>s=192.9m</code> 정지선 앞에서 <code>0.0 km/h</code>로 완전 정차합니다!</li>
+      </ul>
+      <img src="outputs/carla_sota_diffusion_bev_snapshot.png" alt="SOTA DiffusionDrive + Hydra-MDP Snapshot" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_sota_gauntlet_telemetry.png" alt="SOTA 210m Gauntlet Telemetry" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_sota_benchmark_analysis.png" alt="RTX 4090 E2E Benchmark Analysis" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <video src="outputs/carla_sota_diffusion_bev_e2e.mp4" controls style="width:100%; border-radius:8px; margin-top:12px;"></video>
+    </div>
+
+    <div class="card">
+      <h2>15. 중앙선 침범 절대 금지(Yellow-Line Safe) + 동적 돌발 위험(끼어들기 차량 &amp; 보행자 돌발 횡단) SOTA 제어</h2>
+      <p>
+        <code>demo_14_carla_sota_dynamic_cutin_jaywalk.py</code>는 동일 진행 방향 2개 차선(1차선 <code>d=-1.65m</code>, 2차선 <code>d=+1.70m</code>) 사이의 흰색 점선을 기준선(<code>d=0.0m</code>)으로 설정하고 노란색 중앙선(<code>d=-3.45m</code>) 침범을 원천 금지한 상태에서, 실시간으로 움직이는 3대 동적 돌발 위험을 회피합니다:
+      </p>
+      <ul>
+        <li><strong>Stage 2 동적 끼어들기 (Dynamic Cut-In):</strong> 2차선을 달리던 빨간색 Tesla가 자차 앞에서 1차선으로 급격히 끼어들 때, 노란 중앙선을 넘지 않고 비어 있는 우측 2차선(<code>d=+1.70m</code>)으로 즉시 회피 추월합니다.</li>
+        <li><strong>Stage 3 보행자 돌발 횡단 (Sudden Jaywalking):</strong> 횡단보도 우측에서 보행자 2명이 걸어 나올 때 <code>37 km/h → 25 km/h</code>로 감속(Yielding)하며 중앙선 안쪽 1차선(<code>d=-1.60m</code>, 중앙선 대비 <code>1.85m</code> 여유!)으로 안전하게 통과합니다.</li>
+      </ul>
+      <img src="outputs/carla_sota_dynamic_cutin_snapshot.png" alt="Dynamic Cut-In Snapshot" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_sota_dynamic_jaywalk_snapshot.png" alt="Dynamic Jaywalking Snapshot" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_sota_dynamic_telemetry.png" alt="Dynamic Telemetry Analysis" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <video src="outputs/carla_sota_dynamic_cutin_jaywalk.mp4" controls style="width:100%; border-radius:8px; margin-top:12px;"></video>
+    </div>
+
+    <div class="card">
+      <h2>16. 행동 조건부 생성형 월드 모델 (Action-Conditioned World Model: 미래 3가지 평행우주 상상 주행)</h2>
+      <p>
+        <code>demo_15_carla_action_world_model.py</code>는 Tesla FSD World Simulator / Wayve GAIA-1 / NVIDIA Cosmos 스타일의 <strong>Action-Conditioned World Model</strong>을 구현하여, 차량이 실제로 움직이기 전에 신경망이 머릿속으로 <strong>1.8초 뒤(<code>t + 1.8s</code>)의 3가지 평행우주(U0: 1차선 이동, U1: 직진 유지, U2: 2차선 이동)</strong>의 미래 카메라 영상(<code>Dreamed Camera</code>)과 미래 BEV 레이더(<code>Dreamed BEV</code>)를 동시에 상상하고 생존 확률이 가장 높은 평행우주를 선택합니다.
+      </p>
+      <img src="outputs/carla_world_model_dream_cutin.png" alt="World Model Dreaming Cut-In" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_world_model_dream_jaywalk.png" alt="World Model Dreaming Jaywalk" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <img src="outputs/carla_world_model_telemetry.png" alt="World Model Telemetry" style="width:100%; border-radius:8px; margin-top:12px;" />
+      <video src="outputs/carla_world_model_dreaming.mp4" controls style="width:100%; border-radius:8px; margin-top:12px;"></video>
+    </div>
+  </div>
+</body>
+</html>
